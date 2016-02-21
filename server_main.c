@@ -13,8 +13,8 @@ int main(void)
     if (r!=0){
         perror("Создание потока");
     }
-
     pthread_join(server,NULL);
+    printf("Конец работ\n");
     return 0;
 }
 

@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define MSG 1L //информационное сообщение
 #define CONNECT 2L //запрос на подключение
@@ -25,22 +26,30 @@ struct my_msg
 
 };
 
+int flag=1;
+
+
 /*Обработчик сигнала прерывания*/
 void my_sig1 (int param){
     key_t key;
     int qid;
+    int r;
     clear_term();
     key = ftok("/root/",'W');
     qid=msgget(key,0);
-    msgctl(qid,IPC_RMID,NULL); //удаляем очередь
+    r=msgctl(qid,IPC_RMID,NULL); //удаляем очередь
+    if (r== -1){
+        printf("Не удалось удалить очередь\n");
+    }
+
     printf("Программа завершена по сигналу с номером:%d\n",param);
-    exit(0);
+    flag=0;
 
 
 }
 
 /*Поток сервера. Подключает и отключает пользователей.Выводит сообщения на экран*/
-void * server_f (void *arg) {
+void * server_f () {
     key_t key;
     int r;
     struct my_msg msg_buf;
@@ -60,7 +69,7 @@ void * server_f (void *arg) {
     /*Отрисовываем интерфейс чата*/
     new_chat_window();
     signal(SIGINT,my_sig1);
-    while(1){
+    while(flag){
         /*Получаем сообщение из очереди*/
         msgrcv(qid,&msg_buf,sizeof(msg_buf),0,0);
         /*Если сообщение информационное, передаём поле с текстом функции,выводящей текст на экран*/
@@ -87,6 +96,8 @@ void * server_f (void *arg) {
             delete_user(msg_buf.name);
         }
 
+
     }
+    pthread_exit(NULL);
 }
 

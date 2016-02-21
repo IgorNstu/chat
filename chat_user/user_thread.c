@@ -28,7 +28,7 @@ struct my_msg
 
 };
 
- void * client_f (void* arg){
+ void * client_f (){
      key_t key;
      int i,r;
      struct my_msg msg_buf;

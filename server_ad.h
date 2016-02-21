@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 void new_chat_window (void) ;
-void * server_f (void * arg);
+void * server_f ();
 void print_msg(char* , pid_t);
 int new_user (int );
 int clear_msg_window (void);
